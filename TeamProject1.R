@@ -3,6 +3,7 @@
 
 #library(tmap)
 library(dplyr)
+library(fields)
 #load data
 
 madrid <- read.csv(file="E:/STAT647/Homework/Data/madrid_2015.csv")
@@ -26,33 +27,23 @@ madrid_date_id <- madrid %>% group_by(date, id) %>% summarise(BEN=mean(BEN,na.rm
                                                               TCH=mean(TCH,na.rm=TRUE),
                                                               TOL=mean(TOL,na.rm=TRUE))
 summary(madrid_date_id)
-
+#restrict the data to June 01
 madrid_june_01 <- madrid_date_id[(madrid_date_id$date==as.Date("2015-06-01")),]
 
+#summary data
 summary(madrid_june_01)
-hist(madrid_june_01$PM10)
+hist(madrid_june_01$PM10,breaks=15:37)
+#does not work because of missing values
+density(madrid_june_01$PM10,bw="sj")
 qqnorm(madrid_june_01$PM10)
+plot(madrid_june_01)
 
-
+#read in station information
 stations <- read.csv(file="E:/STAT647/Homework/Data/stations.csv")
 
-#restrict the data to June 01
-
-#summarize data
-
-summary(madrid)
-summary(stations)
-
-#this is an expensive operation
-plot(madrid[,-c(1,14)])
-
-#make histograms of each
-par(mfrow=c(3,4))
-for (i in 2:13) {hist(madrid[,i],main=paste("Histogram of",colnames(madrid)[i]))}
-
 #merge the data
-madrid_air <- merge(madrid, stations, by="id")
+madrid_air <- merge(madrid_june_01, stations, by="id")
 
 par(mfrow=c(1,1))
-plot(madrid_air$lat,madrid_air$lon)
+quilt.plot(madrid_air$lat,madrid_air$lon,madrid_air$PM10)
 
