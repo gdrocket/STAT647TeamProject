@@ -47,3 +47,13 @@ madrid_air <- merge(madrid_june_01, stations, by="id")
 par(mfrow=c(1,1))
 quilt.plot(madrid_air$lat,madrid_air$lon,madrid_air$PM10)
 
+#construct variograms?
+# data is lon, lat
+my_vgram <- vgram(madrid_air[,c(17,18)],madrid_air$PM10)
+
+#plot my_vgram
+plot(my_vgram)
+
+#boxplot vgram
+
+boxplot(my_vgram$vgram ~ cut(my_vgram$d,6),xlabel=bins)
