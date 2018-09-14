@@ -1,0 +1,40 @@
+library(fields)
+library(geoR)
+
+##########reading in CSV files###########
+stations <- read.csv('stations.csv')
+madrid2015 <- read.csv('madrid_2015.csv')
+#########################################
+
+#Creating data set z with daily averages#
+y <- stations[,c('id','lon','lat')]
+x <- madrid2015[,c('date','PM10','station')]
+x$date <- as.Date(x$date)
+x <- subset(x, date == '2015-06-01')
+x <- aggregate(x[,'PM10'], list(id = x$station), mean)
+z <- merge(x, y, by='id')
+#########################################
+
+####Summary and simple visualizations####
+summary(z$x)
+hist(z$x, breaks=8, xlim=c(15,40))
+qqnorm(z$x)
+qqline(z$x, col=2, lwd=1, lty=2)
+
+loc <- z[,c('lat','lon')]
+quilt.plot(loc, z$x)
+#########################################
+
+#############Variograms##################
+v1 = vgram(loc, z$x)
+plot(v1$d, v1$vgram) #Cloud - do not include in final report
+plot(v1, ylim=c(0,8)) #Variogram plot
+
+boxplotVGram(v1) #Need units for distance on the x axis
+
+## Directional variogram ##
+# The variog4 function seems to dislike 'NA's #
+z2 <- na.omit(z)
+loc2 <- z2[,c('lat','lon')]
+v2 = variog4(coords = loc2, data = z2$x)
+plot(v2) #these look nothing alike; evidence against isotropy
